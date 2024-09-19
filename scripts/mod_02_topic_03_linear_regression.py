@@ -10,6 +10,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler, PolynomialFeatures
 
 # %%
+# Завантажуються дані про вартість житла в Каліфорнії за допомогою 
+# fetch_california_housing та зберігаються у змінну data. 
+# Виводяться перші кілька рядків даних для ознайомлення
 
 california_housing = fetch_california_housing(as_frame=True)
 
@@ -17,15 +20,24 @@ data = california_housing['frame']
 data.head()
 
 # %%
-
+# Виділення цільової змінної
+# Видаляється стовпець MedHouseVal, який містить середню вартість житла, 
+# і зберігається в окрему змінну target. Цей стовпець є цільовою змінною, 
+# яку ми будемо прогнозувати
 target = data.pop('MedHouseVal')
 target.head()
 
 # %%
-
+# Огляд інформації про дані
+# Метод info() надає загальну інформацію про дані, включаючи кількість рядків,
+# типи даних та наявність пропущених значень.
 data.info()
 
 # %%
+# Візуалізація розподілу даних
+# Використовується seaborn для візуалізації розподілу всіх змінних за 
+# допомогою гістограм. Дані "розплавляються" за допомогою методу melt, 
+# що дозволяє легко будувати графіки для всіх змінних на одній площині
 
 sns.set_theme()
 
@@ -49,11 +61,19 @@ g.tight_layout()
 plt.show()
 
 # %%
+# Опис обраних змінних
+# Виводиться статистичний опис для кількох важливих змінних, 
+# таких як середня кількість кімнат і спалень, середня кількість 
+# мешканців і населення
 
 features_of_interest = ['AveRooms', 'AveBedrms', 'AveOccup', 'Population']
 data[features_of_interest].describe()
 
 # %%
+# Візуалізація географічного розподілу вартості
+# Створюється скаттерплот, що показує вартість житла в залежності від їх 
+# географічного розташування за координатами Longitude і Latitude. 
+# Значення відображаються через колір та розмір точок
 
 fig, ax = plt.subplots(figsize=(6, 5))
 
@@ -77,6 +97,10 @@ plt.title('Median house value depending of\n their spatial location')
 plt.show()
 
 # %%
+# Кореляційна матриця
+# Створюється кореляційна матриця між змінними (за винятком координат). 
+# Відображається теплова карта з кореляціями, що дозволяє оцінити залежності 
+# між різними ознаками.
 
 columns_drop = ['Longitude', 'Latitude']
 subset = pd.concat([data, target], axis=1).drop(columns=columns_drop)
@@ -101,6 +125,8 @@ sns.heatmap(subset.corr(),
 plt.show()
 
 # %%
+# Поділ на тренувальний і тестовий набори
+# Дані поділяються на тренувальний та тестовий набори в пропорції 80/20
 
 X_train, X_test, y_train, y_test = train_test_split(
     data,
@@ -109,17 +135,27 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=42)
 
 # %%
-
+# Масштабування даних
+# Масштабуються всі ознаки для тренувального та тестового наборів за допомогою
+# стандартного масштабування (нормалізація до середнього 0 та 
+# стандартного відхилення 1)
 scaler = StandardScaler().set_output(transform='pandas').fit(X_train)
 
 X_train_scaled = scaler.transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
 # %%
+# Опис масштабованих тренувальних даних
+# Виводиться опис масштабованих тренувальних даних для перевірки 
+# процесу нормалізації
 
 X_train_scaled.describe()
 
 # %%
+# Лінійна регресія і прогнозування
+# Створюється модель лінійної регресії, яка тренується на масштабованих даних.
+# Робляться прогнози для тестового набору, причому прогнозовані значення 
+# обмежуються мінімальними та максимальними значеннями тренувальних даних.
 
 model = LinearRegression().fit(X_train_scaled, y_train)
 y_pred = model.predict(X_test_scaled)
@@ -130,7 +166,9 @@ y_pred = pd.Series(y_pred, index=X_test_scaled.index).clip(ymin, ymax)
 y_pred.head()
 
 # %%
-
+# Оцінка якості моделі
+# Обчислюються основні метрики для оцінки моделі: коефіцієнт детермінації (R²),
+# середня абсолютна помилка (MAE) та середня абсолютна відносна помилка (MAPE).
 r_sq = model.score(X_train_scaled, y_train)
 mae = mean_absolute_error(y_test, y_pred)
 mape = mean_absolute_percentage_error(y_test, y_pred)
@@ -138,11 +176,14 @@ mape = mean_absolute_percentage_error(y_test, y_pred)
 print(f'R2: {r_sq:.2f} | MAE: {mae:.2f} | MAPE: {mape:.2f}')
 
 # %%
-
+# Коефіцієнти моделі
+# Виводяться коефіцієнти ознак у лінійній моделі
 pd.Series(model.coef_, index=X_train_scaled.columns)
 
 # %%
-
+# Модель з поліноміальними ознаками
+# Додаються поліноміальні ознаки другого порядку для поліпшення моделі, 
+# після чого модель знову тренується і обчислюються нові метрики
 # [a, b] -> [1, a, b, a^2, ab, b^2]
 poly = PolynomialFeatures(2).set_output(transform='pandas')
 
@@ -160,6 +201,10 @@ mape_upd = mean_absolute_percentage_error(y_test, y_pred_upd)
 print(f'R2: {r_sq_upd:.2f} | MAE: {mae_upd:.2f} | MAPE: {mape_upd:.2f}')
 
 # %%
+# Аналіз відсоткової похибки
+# Створюється скаттерплот для відображення відсоткової похибки між 
+# прогнозованими та реальними значеннями, що дозволяє проаналізувати
+# точність моделі
 
 pct_error = (y_pred_upd / y_test - 1).clip(-1, 1)
 
