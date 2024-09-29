@@ -80,7 +80,7 @@ valid_data_cleaned = valid_data_cleaned.drop(columns=['Date_Of_Birth'])
 
 # %% Кореляційна матриця для числових ознак
 plt.figure(figsize=(12, 10))
-correlation_matrix = train_data_cleaned.select_dtypes(include=['float64', 'int64']).corr()  # Кореляційна матриця
+correlation_matrix = train_data_cleaned.select_dtypes(include=['float64', 'int64']).corr()
 sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", linewidths=0.5)
 plt.title('Кореляційна матриця тренувальних даних')
 plt.show()
