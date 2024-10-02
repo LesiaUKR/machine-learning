@@ -7,7 +7,7 @@ import seaborn as sns
 
 # %%
 
-with open('../datasets/mod_05_topic_10_various_data.pkl', 'rb') as fl:
+with open('./datasets/mod_05_topic_10_various_data.pkl', 'rb') as fl:
     datasets = pickle.load(fl)
 
 # %%
