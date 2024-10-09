@@ -16,13 +16,14 @@ y = X.pop('price')
 
 # Виведення перших 5 рядків для перевірки результату.
 print(autos.head())
+
 print(autos.info())
 
 # %% 2. Визначення дискретних ознак
 # Визначення категоріальних ознак
 cat_features = X.select_dtypes(include=['object']).columns
 
-# Визначення дискретних числових ознак (якщо вони є)
+# Визначення дискретних числових ознак
 discrete_numerical_features = ['num_of_doors', 'num_of_cylinders']  # Додаткові числові дискретні ознаки
 discrete_features = cat_features.to_list() + discrete_numerical_features
 

@@ -2,6 +2,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 
 # %%
+from sklearn.base import BaseEstimator, TransformerMixin
 
 class VisRatioEstimator(BaseEstimator, TransformerMixin):
 
@@ -30,3 +31,4 @@ class VisRatioEstimator(BaseEstimator, TransformerMixin):
                        x / self.vis_avg[x.name]))
 
         return X
+
